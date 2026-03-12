@@ -1,11 +1,12 @@
 :root {
-  --matrix-bg: #edfdf0;
-  --matrix-panel: rgba(218, 252, 226, 0.65);
-  --matrix-green: #047a2e;
-  --matrix-bright: #025f24;
-  --matrix-dim: rgba(2, 95, 36, 0.4);
-  --matrix-glow: rgba(2, 95, 36, 0.14);
-  --matrix-grid: rgba(2, 95, 36, 0.08);
+  --matrix-bg: #f5fbf6;
+  --matrix-panel: rgba(232, 244, 236, 0.8);
+  --matrix-green: #1e5f3b;
+  --matrix-bright: #154b2f;
+  --matrix-dim: rgba(21, 75, 47, 0.32);
+  --matrix-glow: rgba(21, 75, 47, 0.1);
+  --matrix-grid: rgba(21, 75, 47, 0.055);
+  --matrix-bloom: rgba(21, 75, 47, 0.08);
 
   --sans: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -19,6 +20,7 @@ html.dark {
   --matrix-dim: rgba(0, 255, 87, 0.45);
   --matrix-glow: rgba(0, 255, 87, 0.2);
   --matrix-grid: rgba(0, 255, 87, 0.11);
+  --matrix-bloom: rgba(0, 255, 87, 0.13);
 }
 
 *,
@@ -41,7 +43,7 @@ body {
   background-image:
     linear-gradient(var(--matrix-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--matrix-grid) 1px, transparent 1px),
-    radial-gradient(circle at 50% 0%, rgba(0, 255, 87, 0.13), transparent 58%);
+    radial-gradient(circle at 50% 0%, var(--matrix-bloom), transparent 58%);
   background-size: 28px 28px, 28px 28px, 100% 100%;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
