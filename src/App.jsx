@@ -1,121 +1,136 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useMemo, useState } from 'react';
+import { fetchHeadlines } from './api/news';
+import CategoryFilter from './components/CategoryFilter';
+import NewsList from './components/NewsList';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [articles, setArticles] = useState([]);
+  const [category, setCategory] = useState('general');
+  const [readArticles, setReadArticles] = useState(() => {
+    const saved = localStorage.getItem('readArticles');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const [darkMode, setDarkMode] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const loadNews = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
+        if (!apiKey) {
+          throw new Error('Missing VITE_NEWS_API_KEY in .env or .env.local');
+        }
+
+        const data = await fetchHeadlines(category);
+        setArticles(data);
+        setExpandedId(null);
+      } catch (err) {
+        setError(err.message || 'Failed to load news headlines');
+        setArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Re-fetch when category changes; dependency array prevents infinite loops.
+    loadNews();
+  }, [category]);
+
+  useEffect(() => {
+    localStorage.setItem('readArticles', JSON.stringify(readArticles));
+  }, [readArticles]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    return () => document.documentElement.classList.remove('dark');
+  }, [darkMode]);
+
+  const filteredArticles = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return articles;
+    }
+
+    return articles.filter((article) => {
+      const haystack = `${article.title ?? ''} ${article.description ?? ''}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [articles, search]);
+
+  const handleToggleExpand = (id) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const handleToggleRead = (id) => {
+    setReadArticles((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="app-shell">
+      <header className="app-header">
+        <h1>Headliner</h1>
+        <p className="tagline">Top India headlines in a matrix feed.</p>
+      </header>
 
-      <div className="ticks"></div>
+      <section className="controls" aria-label="News controls">
+        <CategoryFilter category={category} onCategoryChange={setCategory} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className="toolbar">
+          <label className="search-box">
+            <span className="sr-only">Search headlines</span>
+            <input
+              type="search"
+              placeholder="Filter headlines..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+
+          <button
+            type="button"
+            className="toggle-theme"
+            onClick={() => setDarkMode((prev) => !prev)}
+            aria-pressed={darkMode}
+          >
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <p className="read-count">Articles read: {readArticles.length}</p>
+
+      {loading && (
+        <p className="status" role="status">
+          Loading headlines...
+        </p>
+      )}
+
+      {error && !loading && (
+        <p className="status error" role="alert">
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && (
+        <NewsList
+          articles={filteredArticles}
+          readArticles={readArticles}
+          expandedId={expandedId}
+          onToggleExpand={handleToggleExpand}
+          onToggleRead={handleToggleRead}
+        />
+      )}
+    </main>
+  );
 }
 
-export default App
+export default App;
