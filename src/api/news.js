@@ -10,8 +10,18 @@ const CATEGORIES = [
   'science',
 ];
 
+const CATEGORY_QUERY = {
+  general: 'world news',
+  business: 'business',
+  technology: 'technology',
+  sports: 'sports',
+  entertainment: 'entertainment',
+  health: 'health',
+  science: 'science',
+};
+
 /**
- * Fetches top headlines from NewsAPI for India.
+ * Fetches global headlines from NewsAPI.
  * Uses direct NewsAPI by default, then falls back to corsproxy.io
  * only when the browser blocks the request (CORS/network failure).
  *
@@ -23,9 +33,14 @@ async function fetchHeadlines(category = 'general') {
     throw new Error('Missing VITE_NEWS_API_KEY');
   }
 
+  const query = CATEGORY_QUERY[category] || CATEGORY_QUERY.general;
   const newsApiUrl =
-    `https://newsapi.org/v2/top-headlines` +
-    `?country=in&category=${category}&apiKey=${API_KEY}`;
+    `https://newsapi.org/v2/everything` +
+    `?q=${encodeURIComponent(query)}` +
+    `&language=en` +
+    `&sortBy=publishedAt` +
+    `&pageSize=30` +
+    `&apiKey=${API_KEY}`;
 
   let data;
   try {
