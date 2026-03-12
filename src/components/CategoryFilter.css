@@ -12,18 +12,18 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 6px 14px;
-  border: 1px solid var(--matrix-dim);
-  background: transparent;
-  color: var(--matrix-dim);
+  border: 1px solid var(--matrix-green);
+  background: var(--matrix-glow);
+  color: var(--matrix-green);
   cursor: pointer;
   clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
   transition: color 0.2s, border-color 0.2s, background 0.2s, text-shadow 0.2s;
 }
 
 .category-btn:hover {
-  color: var(--matrix-green);
-  border-color: var(--matrix-green);
-  text-shadow: 0 0 8px var(--matrix-green);
+  color: var(--matrix-bright);
+  border-color: var(--matrix-bright);
+  text-shadow: 0 0 8px var(--matrix-bright);
 }
 
 .category-btn.active {
